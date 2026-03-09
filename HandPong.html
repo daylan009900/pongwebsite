@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HandPong Game</title>
+
+  <style>
+    :root {
+      --bg-main: #0a192f;
+      --bg-secondary: rgba(255, 255, 255, 0.05);
+      --border-glass: rgba(255, 255, 255, 0.12);
+      --text-main: #e6f1ff;
+      --text-muted: #9fb3c8;
+      --cyan: #00ffff;
+      --magenta: #ff00ff;
+      --shadow-cyan: 0 0 12px rgba(0, 255, 255, 0.35);
+      --shadow-magenta: 0 0 12px rgba(255, 0, 255, 0.35);
+      --radius: 18px;
+      --transition: 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(0, 255, 255, 0.12), transparent 30%),
+        radial-gradient(circle at top right, rgba(255, 0, 255, 0.10), transparent 25%),
+        linear-gradient(135deg, #081221 0%, #0a192f 100%);
+      color: var(--text-main);
+      padding: 32px 20px 50px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .glass {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 255, 255, 0.4);
+      box-shadow: var(--shadow-cyan);
+    }
+
+    h1, h2, h3 {
+      text-shadow:
+        0 0 6px rgba(0, 255, 255, 0.25),
+        0 0 12px rgba(255, 0, 255, 0.15);
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      text-align: center;
+    }
+
+    .intro {
+      max-width: 760px;
+      margin: 0 auto 28px;
+      text-align: center;
+      color: var(--text-muted);
+      line-height: 1.7;
+      font-size: 1.05rem;
+    }
+
+    .hero {
+      padding: 20px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(0,255,255,0.08), rgba(255,0,255,0.06));
+      pointer-events: none;
+    }
+
+    .hero img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+      min-height: 280px;
+      max-height: 480px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 28px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      padding: 24px;
+    }
+
+    .card-title {
+      margin-bottom: 16px;
+      font-size: 1.4rem;
+    }
+
+    .leaderboard-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      color: var(--cyan);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+      text-align: left;
+    }
+
+    tbody td {
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      color: var(--text-main);
+    }
+
+    tbody tr {
+      transition: var(--transition);
+    }
+
+    tbody tr:hover {
+      background: rgba(0, 255, 255, 0.04);
+    }
+
+    .rank {
+      width: 70px;
+    }
+
+    .score {
+      width: 100px;
+      text-align: right;
+    }
+
+    .muted {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      text-align: center;
+      padding-top: 14px;
+    }
+
+    .error {
+      color: #ff8dbb;
+      font-size: 0.95rem;
+      text-align: center;
+      padding-top: 10px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    .btn {
+      background: rgba(0, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid rgba(0, 255, 255, 0.35);
+      border-radius: 12px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+      box-shadow: 0 0 0 rgba(0, 255, 255, 0);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: rgba(0, 255, 255, 0.14);
+      box-shadow:
+        0 0 12px rgba(0, 255, 255, 0.35),
+        0 0 24px rgba(255, 0, 255, 0.15);
+      animation: pulseGlow 1.2s infinite alternate;
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    @keyframes pulseGlow {
+      from {
+        box-shadow:
+          0 0 10px rgba(0, 255, 255, 0.25),
+          0 0 18px rgba(255, 0, 255, 0.12);
+      }
+      to {
+        box-shadow:
+          0 0 18px rgba(0, 255, 255, 0.5),
+          0 0 28px rgba(255, 0, 255, 0.25);
+      }
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature-card {
+      padding: 22px;
+      position: relative;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 255, 255, 0.35);
+      box-shadow: var(--shadow-cyan), var(--shadow-magenta);
+    }
+
+    .feature-card h3 {
+      margin-bottom: 10px;
+      color: var(--cyan);
+      font-size: 1.1rem;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      line-height: 1.65;
+      font-size: 0.97rem;
+    }
+
+    .extra-info {
+      padding: 22px;
+      text-align: center;
+    }
+
+    .extra-info h2 {
+      margin-bottom: 14px;
+    }
+
+    .download-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color var(--transition), text-shadow var(--transition);
+    }
+
+    .download-link:hover {
+      color: #ffffff;
+      text-shadow:
+        0 0 10px rgba(0, 255, 255, 0.45),
+        0 0 16px rgba(255, 0, 255, 0.25);
+    }
+
+    @media (max-width: 900px) {
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 20px 14px 32px;
+      }
+
+      .card,
+      .hero,
+      .extra-info {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      thead th,
+      tbody td {
+        padding: 12px 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <img
+        class="logo"
+        src="https://www.bing.com/th/id/OIP.Pc9hTwIDJP78Zto96IBRvQHaHa?w=214&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2"
+        alt="HandPong logo"
+      />
+      <h1>My HandPong Game</h1>
+    </div>
+
+    <p class="intro">
+      HandPong is an interactive way to play Pong using real-time hand tracking.
+      The application combines computer vision and gesture recognition so you can
+      control the game with your hands in a futuristic gameplay experience.
+    </p>
+
+    <section class="hero glass">
+      <img
+        src="https://i.postimg.cc/cHHghRRR/AI-pong-picture.png"
+        alt="High-tech hand tracking concept"
+      />
+    </section>
+
+    <section class="content-grid">
+      <div class="card glass">
+        <h2 class="card-title">Top 5 Leaderboard</h2>
+
+        <div class="leaderboard-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="rank">#</th>
+                <th>Username</th>
+                <th class="score">Score</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr>
+                <td colspan="3" class="muted">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="button-row">
+          <button id="refreshBtn" class="btn">Refresh Leaderboard</button>
+        </div>
+
+        <div id="status" class="muted"></div>
+        <div id="error" class="error"></div>
+      </div>
+
+      <div class="card glass">
+        <h2 class="card-title">Technology</h2>
+
+        <div class="feature-grid">
+          <div class="feature-card glass">
+            <h3>OpenCV Computer Vision</h3>
+            <p>
+              OpenCV processes the live camera feed and helps the game understand
+              movement, frames, and visual input in real time.
+            </p>
+          </div>
+
+          <div class="feature-card glass">
+            <h3>Mediapipe Hand Tracking</h3>
+            <p>
+              Mediapipe detects hand landmarks with speed and precision, allowing
+              the paddle to respond naturally to player hand movements.
+            </p>
+          </div>
+
+          <div class="feature-card glass">
+            <h3>Python</h3>
+            <p>
+              Python powers the game logic, integrates the hand-tracking systems,
+              and connects score data to the leaderboard database.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="extra-info glass">
+      <h2>Additional Information</h2>
+      <a
+        class="download-link"
+        href="https://github.com/daylan009900/my-handpong-game"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Download the game
+      </a>
+    </section>
+  </div>
+
+  <script>
+    const DB_URL = "https://pong-game-e4621-default-rtdb.europe-west1.firebasedatabase.app";
+    const LIMIT = 5;
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[c]));
+    }
+
+    async function loadTop5() {
+      const tbody = document.getElementById("leaderboard-body");
+      const status = document.getElementById("status");
+      const error = document.getElementById("error");
+
+      error.textContent = "";
+      status.textContent = "Refreshing leaderboard...";
+
+      const url = `${DB_URL}/scores.json?orderBy="bestScore"&limitToLast=${LIMIT}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} - ${await res.text()}`);
+        }
+
+        const data = await res.json() || {};
+
+        let items = Object.entries(data).map(([username, rec]) => ({
+          username,
+          bestScore: Number(rec?.bestScore ?? 0)
+        }));
+
+        items.sort((a, b) => b.bestScore - a.bestScore);
+
+        if (items.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="3" class="muted">No scores yet.</td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = items.map((it, idx) => `
+            <tr>
+              <td class="rank">${idx + 1}</td>
+              <td>${escapeHtml(it.username)}</td>
+              <td class="score">${it.bestScore}</td>
+            </tr>
+          `).join("");
+        }
+
+        status.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+      } catch (e) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="3" class="muted">Failed to load leaderboard.</td>
+          </tr>
+        `;
+        error.textContent = `Error: ${e.message}`;
+        status.textContent = "";
+      }
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadTop5);
+
+    loadTop5();
+  </script>
+</body>
+</html>
